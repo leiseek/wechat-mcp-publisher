@@ -1,0 +1,43 @@
+name: Publish WeChat Article
+
+on:
+  workflow_dispatch:
+    inputs:
+      article_path:
+        description: 'Path to article file'
+        required: true
+        default: 'article.md'
+      title:
+        description: 'Article title'
+        required: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        
+    - name: Install dependencies
+      run: |
+        pip install requests
+        
+    - name: Get IP address
+      run: |
+        echo "Current GitHub Actions IP:"
+        curl -s ifconfig.me
+        echo ""
+        echo "Please add this IP to WeChat whitelist"
+        
+    - name: Publish article
+      env:
+        WECHAT_APP_ID: ${{ secrets.WECHAT_APP_ID }}
+        WECHAT_APP_SECRET: ${{ secrets.WECHAT_APP_SECRET }}
+      run: |
+        python3 publish_article.py "${{ github.event.inputs.title }}" "${{ github.event.inputs.article_path }}"
