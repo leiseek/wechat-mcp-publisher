@@ -6,8 +6,8 @@
       "version": "20"
     }
   },
-  "postCreateCommand": "npm install && npm run build && (crontab -l 2>/dev/null; echo '* * * * * gh codespace ports visibility 3000:public -c $CODESPACE_NAME 2>/dev/null; pgrep -f \"node dist/http-server\" > /dev/null || nohup node /workspaces/wechat-mcp-server/dist/http-server.js > /tmp/wechat-server.log 2>&1 &') | crontab -",
-  "postStartCommand": "pgrep -f 'node dist/http-server' > /dev/null || nohup node /workspaces/wechat-mcp-server/dist/http-server.js > /tmp/wechat-server.log 2>&1 &",
+  "postCreateCommand": "npm install && npm run build",
+  "postStartCommand": "nohup node dist/http-server.js > /tmp/wechat-server.log 2>&1 &",
   "forwardPorts": [3000],
   "portsAttributes": {
     "3000": {
