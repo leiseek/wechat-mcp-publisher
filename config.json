@@ -1,5 +1,9 @@
 {
-  "WECHAT_APP_ID": "",
-  "WECHAT_APP_SECRET": "",
-  "AUTH_TOKEN": ""
+  "accounts": {
+    "default": {
+      "app_id": "",
+      "app_secret": "",
+      "auth_token": ""
+    }
+  }
 }
