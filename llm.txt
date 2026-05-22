@@ -1,0 +1,118 @@
+# WeChat MP Publisher — MCP Server
+
+微信公众号文章发布 MCP Server。支持多账号管理，可通过 MCP 协议或 HTTP API 调用。
+
+## Tools
+
+### `list_accounts`
+列出所有已配置的公众号账号。
+
+Parameters: 无
+
+### `get_access_token`
+获取指定公众号的 access_token。
+
+Parameters:
+- `account_id` (string, optional) — 公众号标识，不传则使用默认账号
+
+### `add_draft`
+添加文章到指定公众号的草稿箱。
+
+Parameters:
+- `account_id` (string, optional) — 公众号标识，不传则使用默认账号
+- `title` (string, required) — 文章标题
+- `content` (string, required) — 文章内容（HTML 格式）
+- `thumb_media_id` (string, required) — 封面图片的 media_id
+- `author` (string, optional) — 作者
+- `digest` (string, optional) — 摘要
+
+### `publish`
+发布指定公众号的草稿文章。
+
+Parameters:
+- `account_id` (string, optional) — 公众号标识，不传则使用默认账号
+- `media_id` (string, required) — 草稿的 media_id
+
+## Configuration
+
+账号凭据按以下优先级加载：
+
+1. `WECHAT_ACCOUNTS` 环境变量（JSON 格式，支持多账号）
+2. `config.json` 中的 `accounts` 字段
+3. `WECHAT_APP_ID` + `WECHAT_APP_SECRET`（兼容旧版单账号）
+
+### 多账号配置示例
+
+WECHAT_ACCOUNTS 环境变量：
+```json
+{
+  "主号": { "app_id": "wx...", "app_secret": "..." },
+  "订阅号": { "app_id": "wx...", "app_secret": "..." }
+}
+```
+
+config.json：
+```json
+{
+  "accounts": {
+    "主号": { "app_id": "wx...", "app_secret": "..." },
+    "订阅号": { "app_id": "wx...", "app_secret": "..." }
+  }
+}
+```
+
+### 启动方式
+
+```bash
+# MCP 协议（stdio），给 AI 客户端使用
+npm run start:mcp
+
+# HTTP Server，部署到 Codespaces
+npm run start
+```
+
+## Deployment
+
+### GitHub Codespaces（推荐）
+1. Fork 仓库
+2. 设置 GitHub Secrets: `WECHAT_ACCOUNTS`
+3. 点击 `Code` → `Codespaces` → `Create codespace on main`
+4. HTTP Server 自动在 3000 端口启动
+
+### 本地运行
+```bash
+npm install
+npm run build
+export WECHAT_ACCOUNTS='{"主号":{"app_id":"wx...","app_secret":"..."}}'
+npm run start:mcp
+```
+
+## HTTP API Endpoints
+
+部署到 Codespaces 后可通过 HTTP 调用：
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /api/health | 健康检查 |
+| GET | /api/accounts | 列出账号 |
+| POST | /api/token | 获取 access_token |
+| POST | /api/draft | 添加草稿 |
+| POST | /api/publish | 发布文章 |
+| POST | /api/upload-image | 上传封面图 |
+
+HTTP 请求体示例：
+```json
+{
+  "account_id": "主号",
+  "title": "文章标题",
+  "content": "<h1>内容</h1>",
+  "thumb_media_id": "封面图片ID"
+}
+```
+
+## 注意事项
+
+- 封面图片需先上传到微信服务器获取 media_id
+- 每天最多发布 1 次（微信公众号 API 限制）
+- content 字段必须是 HTML 格式
+- access_token 自动缓存和刷新（提前 5 分钟）
